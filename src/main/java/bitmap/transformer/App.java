@@ -20,7 +20,7 @@ public class App {
     public static void main(String[] args) {
 //        BufferedImage imageToTransform = getBitmap("./src/main/resources/Coffee.bmp");
 //        seeThroughImage(imageToTransform, "opacityTest.bmp");
-        seeThroughImage("./src/main/resources/Coffee.bmp", "opacityTest.bmp");
+        turnBlue("./src/main/resources/Coffee.bmp", "blueTest.bmp");
 
        // BufferedImage test = getBitmap("./src/main/resources/Coffee.bmp");
        // saveBitmap(test, "test.bmp");
@@ -61,7 +61,32 @@ public class App {
         }
     }
 
-    public static void seeThroughImage(String filePath, String fileName){
+    public static int targetPixel(int pixel){
+
+
+        //get alpha (might not actually have an alpha)
+        int a = (pixel>>24) & 0xff;
+
+        //get red
+        int r = (pixel>>16) & 0xff;
+
+        //get green
+        int g = (pixel>>8) & 0xff;
+
+        //get blue
+        int b = pixel & 0xff;
+
+
+        a *= 0.5;
+        r *= 0.5;
+
+        pixel = (a<<24) | (r<<16) | (g<<8) | b;
+
+
+        return pixel;
+    }
+
+    public static void turnBlue(String filePath, String fileName){
 
         BufferedImage imageToTransform = getBitmap(filePath);
 
@@ -71,14 +96,18 @@ public class App {
         try {
             int imageWidth = imageToTransform.getWidth();
             int imageHeight = imageToTransform.getHeight();
-            transformedImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+            transformedImage = imageToTransform;
 
-
-//            System.out.println(imageToTransform.getType());
             System.out.println("Attempting to transform file");
 
-
-
+            for ( int i = 0; i < imageWidth; i++ ){
+                for ( int j = 0; j < imageHeight; j++ ){
+                    //get pixel value
+                    int pixel = imageToTransform.getRGB(i,j);
+                    int alteredPixel = targetPixel(pixel);
+                    transformedImage.setRGB(i, j, alteredPixel);
+                }
+            }
 
 
             saveBitmap(transformedImage, fileName);
