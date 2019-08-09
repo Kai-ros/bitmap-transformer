@@ -3,12 +3,122 @@
  */
 package bitmap.transformer;
 
+import javax.imageio.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.Scanner;
+
+
+
 public class App {
-    public String getGreeting() {
-        return "Hello world.";
-    }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+//        BufferedImage imageToTransform = getBitmap("./src/main/resources/Coffee.bmp");
+//        seeThroughImage(imageToTransform, "opacityTest.bmp");
+        turnBlue("./src/main/resources/Coffee.bmp", "blueTest.bmp");
+
+       // BufferedImage test = getBitmap("./src/main/resources/Coffee.bmp");
+       // saveBitmap(test, "test.bmp");
+
     }
+
+
+    public static BufferedImage getBitmap(String BMPFileName){
+
+        File bmpFile = new File(BMPFileName);
+        BufferedImage bitmapOriginal = null;
+
+        try {
+            bitmapOriginal = ImageIO.read(bmpFile);
+            System.out.println("File was retrieved and read");
+
+        } catch (java.io.IOException e){
+            System.out.println("IO Exception");
+            System.out.println(e);
+        }
+
+        return bitmapOriginal;
+    }
+
+    public static void saveBitmap(BufferedImage newImage, String newBMPFIleName){
+        try {
+            ///src/main/resources
+            StringBuilder fileName = new StringBuilder();
+            File outputFile = new File(fileName.append("./src/main/resources/").append(newBMPFIleName).toString());
+
+            ImageIO.write(newImage, "BMP", outputFile);
+
+            System.out.println("New file was saved");
+
+        } catch (java.io.IOException e){
+            System.out.println("IO Exception");
+            System.out.println(e);
+        }
+    }
+
+    public static int targetPixel(int pixel){
+
+
+        //get alpha (might not actually have an alpha)
+        int a = (pixel>>24) & 0xff;
+
+        //get red
+        int r = (pixel>>16) & 0xff;
+
+        //get green
+        int g = (pixel>>8) & 0xff;
+
+        //get blue
+        int b = pixel & 0xff;
+
+
+        a *= 0.5;
+        r *= 0.5;
+
+        pixel = (a<<24) | (r<<16) | (g<<8) | b;
+
+
+        return pixel;
+    }
+
+    public static void turnBlue(String filePath, String fileName){
+
+        BufferedImage imageToTransform = getBitmap(filePath);
+
+
+        BufferedImage transformedImage = null;
+
+        try {
+            int imageWidth = imageToTransform.getWidth();
+            int imageHeight = imageToTransform.getHeight();
+            transformedImage = imageToTransform;
+
+            System.out.println("Attempting to transform file");
+
+            for ( int i = 0; i < imageWidth; i++ ){
+                for ( int j = 0; j < imageHeight; j++ ){
+                    //get pixel value
+                    int pixel = imageToTransform.getRGB(i,j);
+                    int alteredPixel = targetPixel(pixel);
+                    transformedImage.setRGB(i, j, alteredPixel);
+                }
+            }
+
+
+            saveBitmap(transformedImage, fileName);
+
+        } catch (Exception e){
+            System.out.println("Vague Exception");
+            System.out.println(e);
+        }
+
+
+
+    }
+
 }
